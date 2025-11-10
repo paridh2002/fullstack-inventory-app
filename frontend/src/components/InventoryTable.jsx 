@@ -1,0 +1,173 @@
+import React, { useState } from "react";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField } from "@mui/material";
+
+const InventoryTable = ({ inventory, isAdmin, onAdd, onUpdate, onDelete }) => {
+  const [editing, setEditing] = useState(null);
+  const [editData, setEditData] = useState({});
+  const [newItem, setNewItem] = useState({ itemName: "", quantity: "", supplier: "", location: "" });
+
+  const handleEdit = (item) => {
+    setEditing(item._id);
+    setEditData(item);
+  };
+
+  const handleSave = () => {
+    onUpdate(editing, editData);
+    setEditing(null);
+    setEditData({});
+  };
+
+  const handleChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Item Name</TableCell>
+            <TableCell>Quantity</TableCell>
+            <TableCell>Supplier</TableCell>
+            <TableCell>Location</TableCell>
+            <TableCell>Last Restocked</TableCell>
+            {isAdmin && <TableCell>Actions</TableCell>}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {inventory.map((item) => (
+            <TableRow key={item._id}>
+              <TableCell>
+                {editing === item._id ? (
+                  <TextField
+                    name="itemName"
+                    value={editData.itemName}
+                    onChange={handleChange}
+                    size="small"
+                  />
+                ) : (
+                  item.itemName
+                )}
+              </TableCell>
+              <TableCell>
+                {editing === item._id ? (
+                  <TextField
+                    name="quantity"
+                    value={editData.quantity}
+                    type="number"
+                    onChange={handleChange}
+                    size="small"
+                  />
+                ) : (
+                  item.quantity
+                )}
+              </TableCell>
+              <TableCell>
+                {editing === item._id ? (
+                  <TextField
+                    name="supplier"
+                    value={editData.supplier || ""}
+                    onChange={handleChange}
+                    size="small"
+                  />
+                ) : (
+                  item.supplier
+                )}
+              </TableCell>
+              <TableCell>
+                {editing === item._id ? (
+                  <TextField
+                    name="location"
+                    value={editData.location || ""}
+                    onChange={handleChange}
+                    size="small"
+                  />
+                ) : (
+                  item.location
+                )}
+              </TableCell>
+              <TableCell>
+                {new Date(item.lastRestocked).toLocaleString()}
+              </TableCell>
+              {isAdmin && (
+                <TableCell>
+                  {editing === item._id ? (
+                    <>
+                      <Button size="small" variant="contained" color="success" onClick={handleSave}>Save</Button>
+                      <Button size="small" onClick={() => setEditing(null)}>Cancel</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button size="small" onClick={() => handleEdit(item)}>
+                        Edit
+                      </Button>
+                      <Button size="small" color="error" onClick={() => onDelete(item._id)}>
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+          {isAdmin && (
+            <TableRow>
+              <TableCell>
+                <TextField
+                  name="itemName"
+                  value={newItem.itemName}
+                  onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
+                  size="small"
+                  placeholder="Item"
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  name="quantity"
+                  value={newItem.quantity}
+                  onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+                  type="number"
+                  size="small"
+                  placeholder="Qty"
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  name="supplier"
+                  value={newItem.supplier}
+                  onChange={(e) => setNewItem({ ...newItem, supplier: e.target.value })}
+                  size="small"
+                  placeholder="Supplier"
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  name="location"
+                  value={newItem.location}
+                  onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
+                  size="small"
+                  placeholder="Location"
+                />
+              </TableCell>
+              <TableCell></TableCell>
+              <TableCell>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    onAdd(newItem);
+                    setNewItem({ itemName: "", quantity: "", supplier: "", location: "" });
+                  }}
+                >
+                  Add
+                </Button>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+export default InventoryTable;
